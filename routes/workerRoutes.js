@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const user = require('../models/worker');
+const worker = require('./../models/worker');
 
    //post(api to register as worker)
    router.post('/workersignup', async(req,res)=>{
@@ -35,19 +35,7 @@ const user = require('../models/worker');
     }
    })
        
- //get methord (API TO FETCH USER INFORMATION)
- router.get('/workersignup', async(req, res)=>{
-    try{
-      const data = await worker.find();
-      console.log('data fetched');
-      res.status(200).json(data);
-    } 
-      catch(err){
-        console.log(err);
-        res.status(500).json({error: 'Internal Serve Error'});
-  
-    }
-   })
+ 
    //to define work type of worker(API TO FETCH THE DATA OF PRTICULAR WORKER)
  router.get('/:workType', async(req, res)=>{
     try{
