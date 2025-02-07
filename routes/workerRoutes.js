@@ -20,6 +20,20 @@ const user = require('../models/worker');
       res.status(500).json({error: 'Internal Serve Error'});
     }
    })
+
+     //get methord (API TO GET FETCH USER INFORMATION OF WORKER)
+  router.get('/workersignup', async(req, res)=>{
+    try{
+      const data = await worker.find();
+      console.log('data fetched');
+      res.status(200).json(data);
+    } 
+      catch(err){
+        console.log(err);
+        res.status(500).json({error: 'Internal Serve Error'});
+  
+    }
+   })
        
  //get methord (API TO FETCH USER INFORMATION)
  router.get('/workersignup', async(req, res)=>{

@@ -30,37 +30,66 @@ app.get('/',localAuthMiddleware ,function(req,res){
 
   }
  })
-//post(api to resister user)
- app.post('/usersignup', async(req,res)=>{
+ // Login Route
+app.post('/login', async(req, res) => {
   try{
-    const data = req.body//assuming the req body contains the user data
+      // Extract aadharCardNumber and password from request body
+      const {email, password} = req.body;
 
-    //create new user document using the mongoose model
-    const newuser = new user(data);
+      // Check if aadharCardNumber or password is missing
+      if (!email || !password) {
+          return res.status(400).json({ error: 'email and password are required' });
+      }
 
-    //save the new user to the database
-    const response = await newuser.save();
-    console.log('data saved');
-    res.status(200).json(response); 
+      // Find the user by aadharCardNumber
+      const user = await user.findOne({email: email});
+
+      // If user does not exist or password does not match, return error
+      if( !user || !(await user.comparePassword(password))){
+          return res.status(401).json({error: 'email Card Number or Password'});
+      }
+            // generate Token 
+            const payload = {
+              id: user.id,
+          }
+          const token = generateToken(payload);
+  
+          // resturn token as response
+          res.json({token})
+ 
+  }catch(err){
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
   }
-  catch(err){
-    console.log(err);
-    res.status(500).json({error: 'Internal Serve Error'});
-  }
- })
-  //get methord (API TO GET FETCH USER INFORMATION OF WORKER)
-  app.get('/workersignup', async(req, res)=>{
-    try{
-      const data = await worker.find();
-      console.log('data fetched');
-      res.status(200).json(data);
-    } 
+});
+    //post(api to register as user)
+    app.post('/usersignup', async(req,res)=>{
+      try{
+        const data = req.body//assuming the req body contains the person data
+    
+        //create new person document using the mongoose model
+        const newuser = new user(data);
+    
+        //save the new person to the database
+        const response = await newuser.save();
+        console.log('data saved');
+
+        const payload ={
+          id: response.id
+        }
+        console.log(JSON.stringify(payload));
+        const tocken = generateToken(payload);
+        console.log("Tocken is :",tocken);
+        res.status(200).json({response: response, tocken: tocken}); 
+      }
       catch(err){
         console.log(err);
         res.status(500).json({error: 'Internal Serve Error'});
-  
-    }
-   })
+      }
+     })
+ 
+ 
+
    //post(api to register as worker)
    app.post('/workersignup', async(req,res)=>{
     try{
@@ -79,8 +108,21 @@ app.get('/',localAuthMiddleware ,function(req,res){
       res.status(500).json({error: 'Internal Serve Error'});
     }
    })
+     //get methord (API TO GET FETCH USER INFORMATION OF WORKER)
+  app.get('/workersignup', async(req, res)=>{
+    try{
+      const data = await worker.find();
+      console.log('data fetched');
+      res.status(200).json(data);
+    } 
+      catch(err){
+        console.log(err);
+        res.status(500).json({error: 'Internal Serve Error'});
+  
+    }
+   })
 //to define work type of worker(API TO FETCH THE DATA OF PRTICULAR WORKER)
- app.get('/workersignup/:workType', async(req, res)=>{
+app.get('/workersignup/:workType', async(req, res)=>{
   try{
     const workType = req.params.workType;//to extract the work type from the uml parameter
     if(workType =='Plumber'|| workType == 'Electrician'|| workType=='Engineer'){
