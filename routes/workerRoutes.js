@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const worker = require('./../models/worker');
+const {jwtAuthMiddleware, generateToken} = require('./../jwt');
 
    //post(api to register as worker)
    router.post('/workersignup', async(req,res)=>{
@@ -13,7 +14,13 @@ const worker = require('./../models/worker');
       //save the new person to the database
       const response = await newworker.save();
       console.log('data saved');
-      res.status(200).json(response); 
+      const payload ={
+        id: response.id
+      }
+      console.log(JSON.stringify(payload));
+      const tocken = generateToken(payload);
+      console.log("Tocken is :",tocken);
+      res.status(200).json({response: response, tocken: tocken});
     }
     catch(err){
       console.log(err);
